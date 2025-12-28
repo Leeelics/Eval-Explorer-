@@ -1,20 +1,64 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ResearchCard from './components/ResearchCard';
 import AIAssistant from './components/AIAssistant';
 import DetailView from './components/DetailView';
-import { RESEARCH_ITEMS } from './data';
+import AuthModal from './components/AuthModal';
+import AddEntryModal from './components/AddEntryModal';
+import { RESEARCH_ITEMS as INITIAL_ITEMS } from './data';
 import { Category, ResourceType, ResearchItem } from './types';
 
 const App: React.FC = () => {
+  const [items, setItems] = useState<ResearchItem[]>(INITIAL_ITEMS);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
   const [selectedType, setSelectedType] = useState<ResourceType | 'All'>('All');
   const [selectedItem, setSelectedItem] = useState<ResearchItem | null>(null);
+  
+  // Auth & UI State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; avatar: string } | null>(null);
+
+  // Load persistence
+  useEffect(() => {
+    const saved = localStorage.getItem('user_research_items');
+    const savedUser = localStorage.getItem('eval_explorer_user');
+    if (saved) {
+      setItems([...INITIAL_ITEMS, ...JSON.parse(saved)]);
+    }
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogin = (provider: 'google' | 'github') => {
+    const mockUser = {
+      name: provider === 'google' ? 'Google Researcher' : 'GitHub Contributor',
+      avatar: provider === 'google' 
+        ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=Google' 
+        : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Github'
+    };
+    setUser(mockUser);
+    localStorage.setItem('eval_explorer_user', JSON.stringify(mockUser));
+    setIsAuthModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('eval_explorer_user');
+  };
+
+  const handleAddItem = (newItem: ResearchItem) => {
+    const userItems = JSON.parse(localStorage.getItem('user_research_items') || '[]');
+    const updatedUserItems = [...userItems, newItem];
+    localStorage.setItem('user_research_items', JSON.stringify(updatedUserItems));
+    setItems([...INITIAL_ITEMS, ...updatedUserItems]);
+  };
 
   const filteredItems = useMemo(() => {
-    return RESEARCH_ITEMS.filter(item => {
+    return items.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                            item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -23,37 +67,50 @@ const App: React.FC = () => {
       
       return matchesSearch && matchesCategory && matchesType;
     });
-  }, [searchTerm, selectedCategory, selectedType]);
+  }, [searchTerm, selectedCategory, selectedType, items]);
 
   const categories = ['All', ...Object.values(Category)];
   const types = ['All', ...Object.values(ResourceType)];
 
   return (
     <div className="min-h-screen pb-20">
-      <Navbar />
+      <Navbar 
+        onSignInClick={() => setIsAuthModalOpen(true)} 
+        onAddClick={() => setIsAddModalOpen(true)}
+        user={user}
+        onLogout={handleLogout}
+      />
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        onLogin={handleLogin}
+      />
+
+      <AddEntryModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onSave={handleAddItem}
+      />
 
       <main className="max-w-7xl mx-auto px-6">
-        {/* Hero Section - Hide when viewing details for focus */}
         {!selectedItem && (
           <section className="mb-16 text-center animate-in fade-in duration-700">
             <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
               LLM Evaluation Research Hub
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Discover the seminal papers and essential benchmarks driving the science of Large Language Model evaluation.
+              Explore the seminal papers and essential benchmarks driving the science of Large Language Model evaluation.
             </p>
           </section>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8">
-            
             {selectedItem ? (
               <DetailView item={selectedItem} onBack={() => setSelectedItem(null)} />
             ) : (
               <>
-                {/* Controls */}
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between glass-card p-4 rounded-2xl sticky top-24 z-40 shadow-xl shadow-slate-900/50">
                   <div className="relative w-full md:w-64">
                     <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
@@ -84,7 +141,6 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
                   {filteredItems.length > 0 ? (
                     filteredItems.map(item => (
@@ -100,12 +156,6 @@ const App: React.FC = () => {
                         <i className="fas fa-database text-4xl mb-3 opacity-20"></i>
                         <p className="text-lg">No research matches your filters</p>
                       </div>
-                      <button 
-                        onClick={() => {setSearchTerm(''); setSelectedCategory('All'); setSelectedType('All');}}
-                        className="text-blue-500 hover:text-blue-400 font-medium transition-colors"
-                      >
-                        Clear all filters
-                      </button>
                     </div>
                   )}
                 </div>
@@ -113,7 +163,6 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {/* Sidebar Area */}
           <aside className="lg:col-span-4 space-y-8">
             <div className="sticky top-24">
               <AIAssistant />
@@ -126,27 +175,35 @@ const App: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400">Total Resources</span>
-                    <span className="text-white font-mono">{RESEARCH_ITEMS.length}</span>
+                    <span className="text-white font-mono">{items.length}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400">Total Citations Indexed</span>
                     <span className="text-white font-mono">
-                      {RESEARCH_ITEMS.reduce((acc, curr) => acc + (curr.citationCount || 0), 0).toLocaleString()}
+                      {items.reduce((acc, curr) => acc + (curr.citationCount || 0), 0).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-400">Latest Entry</span>
-                    <span className="text-white font-mono">TruthfulQA (2022)</span>
+                    <span className="text-slate-400">User Submissions</span>
+                    <span className="text-white font-mono">{items.length - INITIAL_ITEMS.length}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20">
-                <p className="text-[10px] text-blue-400 uppercase font-bold mb-2 tracking-widest">Knowledge Base</p>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Our repository contains peer-reviewed papers and validated datasets. Click on any item to explore its methodology, citation impact, and related research.
-                </p>
-              </div>
+              {!user && (
+                <div className="mt-6 p-6 rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 border border-blue-400/20 shadow-xl shadow-blue-900/40">
+                  <h4 className="text-white font-bold text-lg mb-2">Want to contribute?</h4>
+                  <p className="text-blue-100 text-xs mb-4 leading-relaxed">
+                    Join our community of researchers to add new benchmarks and papers to the hub.
+                  </p>
+                  <button 
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="w-full py-2.5 bg-white text-blue-700 font-bold rounded-xl text-xs hover:bg-slate-100 transition-colors"
+                  >
+                    Join Hub
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
         </div>
@@ -154,13 +211,8 @@ const App: React.FC = () => {
 
       <footer className="mt-20 border-t border-slate-800 py-10 text-center">
         <p className="text-slate-500 text-sm">
-          &copy; 2024 EvalExplorer Research Repository. All rights reserved.
+          &copy; 2024 EvalExplorer Research Repository.
         </p>
-        <div className="flex justify-center space-x-6 mt-4">
-          <a href="#" className="text-slate-500 hover:text-white transition-colors"><i className="fab fa-github"></i></a>
-          <a href="#" className="text-slate-500 hover:text-white transition-colors"><i className="fab fa-twitter"></i></a>
-          <a href="#" className="text-slate-500 hover:text-white transition-colors"><i className="fas fa-envelope"></i></a>
-        </div>
       </footer>
     </div>
   );
