@@ -26,11 +26,80 @@ const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack }) => {
       </div>
 
       <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-10">
           <section>
             <h4 className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-4">Description</h4>
             <p className="text-slate-300 text-lg leading-relaxed">{model.description}</p>
           </section>
+
+          {/* New: Capabilities Analysis (Strengths & Limitations) */}
+          {(model.strengths || model.limitations) && (
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {model.strengths && (
+                <div className="bg-emerald-900/5 border border-emerald-500/20 p-5 rounded-2xl">
+                   <h4 className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
+                     <i className="fas fa-plus-circle"></i> Key Strengths
+                   </h4>
+                   <ul className="space-y-2">
+                     {model.strengths.map((s, i) => (
+                       <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
+                         <i className="fas fa-check text-emerald-500 mt-1 text-[10px]"></i>
+                         {s}
+                       </li>
+                     ))}
+                   </ul>
+                </div>
+              )}
+              {model.limitations && (
+                 <div className="bg-red-900/5 border border-red-500/20 p-5 rounded-2xl">
+                   <h4 className="text-red-400 text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
+                     <i className="fas fa-minus-circle"></i> Limitations
+                   </h4>
+                   <ul className="space-y-2">
+                     {model.limitations.map((s, i) => (
+                       <li key={i} className="text-slate-300 text-sm flex items-start gap-2">
+                         <i className="fas fa-exclamation text-red-500 mt-1 text-[10px]"></i>
+                         {s}
+                       </li>
+                     ))}
+                   </ul>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* New: Ecosystem / Variants Matrix */}
+          {model.variants && (
+            <section>
+               <h4 className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-4">Model Family Matrix</h4>
+               <div className="overflow-x-auto rounded-2xl border border-slate-700/50">
+                 <table className="w-full text-left text-sm">
+                   <thead className="bg-slate-800/50 text-slate-400 uppercase text-[10px] font-bold">
+                     <tr>
+                       <th className="px-6 py-3">Variant</th>
+                       <th className="px-6 py-3">Params</th>
+                       <th className="px-6 py-3">License</th>
+                       <th className="px-6 py-3">Recommended Use</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-800">
+                     {model.variants.map((v, i) => (
+                       <tr key={i} className="hover:bg-slate-800/30">
+                         <td className="px-6 py-4 font-bold text-white">{v.name}</td>
+                         <td className="px-6 py-4 text-slate-400 font-mono text-xs">{v.params}</td>
+                         <td className="px-6 py-4 text-slate-400 text-xs">
+                           <span className={`px-2 py-0.5 rounded ${v.license.includes('Apache') ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                             {v.license}
+                           </span>
+                         </td>
+                         <td className="px-6 py-4 text-slate-300 text-xs italic">{v.recommendedUse}</td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+            </section>
+          )}
 
           <section>
             <h4 className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-4">Benchmark Scores</h4>
@@ -50,7 +119,7 @@ const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack }) => {
             </div>
           </section>
 
-          {/* New: Genealogy / Family Tree */}
+          {/* Genealogy / Family Tree */}
           <section className="bg-slate-900/50 p-6 rounded-3xl border border-slate-700/30">
             <h4 className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-6 text-center">Model Genealogy</h4>
             <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-4">

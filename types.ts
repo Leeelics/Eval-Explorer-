@@ -10,7 +10,9 @@ export enum Category {
   CODING = 'Coding',
   MATH = 'Math',
   SAFETY = 'Safety',
-  MULTILINGUAL = 'Multilingual'
+  MULTILINGUAL = 'Multilingual',
+  LONG_CONTEXT = 'Long Context',
+  MEDICAL = 'Medical'
 }
 
 export interface RelatedPaper {
@@ -30,21 +32,26 @@ export interface LeaderboardEntry {
   date: string;
 }
 
-// New Interface for Dataset Samples
 export interface DatasetExample {
   id: string;
   prompt: string;
-  options?: string[]; // For multiple choice
+  options?: string[];
   answer: string;
-  reasoning?: string; // For Chain-of-Thought explanation
+  reasoning?: string;
 }
 
-// New Interface for Metric Details
 export interface MetricConfig {
   name: string;
   description: string;
-  formula?: string; // Pseudo-code or short explanation
-  range?: string; // e.g., "0-100%"
+  formula?: string;
+  range?: string;
+}
+
+// New: Expert Analysis/Insights for Datasets (The "Think Tank" factor)
+export interface AnalysisInsight {
+  type: 'WARNING' | 'CRITIQUE' | 'SATURATION' | 'INFO';
+  title: string;
+  content: string;
 }
 
 export interface ResearchItem {
@@ -67,9 +74,19 @@ export interface ResearchItem {
   metrics?: string[];
   involvedModels?: string[];
   leaderboard?: LeaderboardEntry[];
-  // New Fields
   exampleQuestions?: DatasetExample[];
   metricConfigs?: MetricConfig[];
+  // New field
+  analysisInsights?: AnalysisInsight[];
+}
+
+// New: Model Variants and Capabilities
+export interface ModelVariant {
+  name: string;
+  params: string;
+  contextWindow: string;
+  license: string;
+  recommendedUse: string; // Guidance on when to use this specific variant
 }
 
 export interface ModelItem {
@@ -89,6 +106,10 @@ export interface ModelItem {
   predecessorName?: string;
   successorId?: string;
   successorName?: string;
+  // New ecosystem fields
+  variants?: ModelVariant[];
+  strengths?: string[];
+  limitations?: string[];
 }
 
 export interface ChatMessage {

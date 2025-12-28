@@ -12,6 +12,24 @@ const DetailView: React.FC<DetailViewProps> = ({ item, onBack }) => {
   const isDataset = item.type === ResourceType.DATASET;
   const [showAnswer, setShowAnswer] = useState(false);
 
+  const getInsightIcon = (type: string) => {
+    switch(type) {
+      case 'WARNING': return 'fa-exclamation-triangle text-amber-500';
+      case 'CRITIQUE': return 'fa-glasses text-indigo-400';
+      case 'SATURATION': return 'fa-chart-line text-red-400';
+      default: return 'fa-info-circle text-blue-400';
+    }
+  };
+
+  const getInsightColor = (type: string) => {
+    switch(type) {
+      case 'WARNING': return 'border-amber-500/30 bg-amber-500/5';
+      case 'CRITIQUE': return 'border-indigo-500/30 bg-indigo-500/5';
+      case 'SATURATION': return 'border-red-500/30 bg-red-500/5';
+      default: return 'border-blue-500/30 bg-blue-500/5';
+    }
+  };
+
   return (
     <div className="glass-card rounded-3xl overflow-hidden border border-blue-500/30 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-gradient-to-r from-slate-900 to-blue-900/40 p-8 border-b border-slate-700/50">
@@ -61,6 +79,29 @@ const DetailView: React.FC<DetailViewProps> = ({ item, onBack }) => {
 
       <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-10">
+          
+          {/* New: Expert Insights / Critique Section */}
+          {item.analysisInsights && item.analysisInsights.length > 0 && (
+            <section className="animate-in fade-in duration-700 delay-100">
+              <h4 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+                <i className="fas fa-lightbulb text-yellow-400"></i> Expert Insights
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {item.analysisInsights.map((insight, idx) => (
+                  <div key={idx} className={`rounded-xl p-5 border ${getInsightColor(insight.type)}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <i className={`fas ${getInsightIcon(insight.type)} text-sm`}></i>
+                      <span className="font-bold text-slate-200 text-sm">{insight.title}</span>
+                    </div>
+                    <p className="text-slate-400 text-xs leading-relaxed">
+                      {insight.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section>
             <h4 className="text-blue-400 text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
               <i className="fas fa-info-circle"></i> Overview
@@ -68,7 +109,7 @@ const DetailView: React.FC<DetailViewProps> = ({ item, onBack }) => {
             <p className="text-slate-300 leading-relaxed text-lg italic">{item.description}</p>
           </section>
 
-          {/* New: Data Samples / Inspection Deck */}
+          {/* Data Samples / Inspection Deck */}
           {item.exampleQuestions && item.exampleQuestions.length > 0 && (
             <section className="bg-slate-900 border border-slate-700/50 rounded-2xl overflow-hidden shadow-2xl shadow-black/40">
               <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
@@ -117,7 +158,7 @@ const DetailView: React.FC<DetailViewProps> = ({ item, onBack }) => {
             </section>
           )}
 
-          {/* New: Metric Logic Deep Dive */}
+          {/* Metric Logic Deep Dive */}
           {item.metricConfigs && item.metricConfigs.length > 0 && (
             <section>
               <h4 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -165,37 +206,6 @@ const DetailView: React.FC<DetailViewProps> = ({ item, onBack }) => {
             </section>
           )}
 
-          {/* Leaderboard */}
-          {isDataset && item.leaderboard && (
-            <section>
-              <h4 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-                <i className="fas fa-trophy text-amber-400"></i> Model Rankings
-              </h4>
-              <div className="overflow-hidden rounded-2xl border border-slate-700/50">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-800/50 text-slate-400 uppercase text-[10px] font-bold">
-                    <tr>
-                      <th className="px-6 py-3">Rank</th>
-                      <th className="px-6 py-3">Model</th>
-                      <th className="px-6 py-3 text-right">Score ({item.leaderboard[0].metric})</th>
-                      <th className="px-6 py-3 text-right">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800">
-                    {item.leaderboard.map((entry, idx) => (
-                      <tr key={idx} className="hover:bg-blue-500/5 transition-colors">
-                        <td className="px-6 py-4 font-mono text-slate-500">#{idx + 1}</td>
-                        <td className="px-6 py-4 font-bold text-slate-200">{entry.modelName}</td>
-                        <td className="px-6 py-4 text-right text-blue-400 font-bold">{entry.score}</td>
-                        <td className="px-6 py-4 text-right text-slate-500 text-xs">{entry.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-
           {item.methodology && (
             <section className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-2xl">
               <h4 className="text-white text-sm font-bold uppercase tracking-wider mb-3">Methodology</h4>
@@ -218,14 +228,17 @@ const DetailView: React.FC<DetailViewProps> = ({ item, onBack }) => {
                   </div>
                 </div>
               )}
-              {item.involvedModels && (
+              {item.leaderboard && (
                 <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold block mb-2">Notable Models</span>
-                  <div className="flex flex-wrap gap-2">
-                    {item.involvedModels.map(m => (
-                      <span key={m} className="px-2 py-1 bg-blue-900/20 text-blue-400 text-xs rounded border border-blue-500/10">{m}</span>
-                    ))}
-                  </div>
+                   <span className="text-[10px] text-slate-500 uppercase font-bold block mb-2">Current Top 3</span>
+                   <ul className="space-y-2">
+                     {item.leaderboard.slice(0, 3).map((l, i) => (
+                       <li key={i} className="flex justify-between text-xs border-b border-slate-700/50 pb-1 last:border-0">
+                         <span className="text-slate-300">{l.modelName}</span>
+                         <span className="text-blue-400 font-bold">{l.score}</span>
+                       </li>
+                     ))}
+                   </ul>
                 </div>
               )}
             </div>
