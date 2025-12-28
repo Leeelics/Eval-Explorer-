@@ -18,6 +18,12 @@ export interface RelatedPaper {
   link: string;
 }
 
+// Added ChatMessage interface to fix 'Module has no exported member' error
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface ResearchItem {
   id: string;
   title: string;
@@ -35,9 +41,4 @@ export interface ResearchItem {
   domain?: string; // For papers
   citationCount?: number;
   relatedPapers?: RelatedPaper[];
-}
-
-export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
 }
