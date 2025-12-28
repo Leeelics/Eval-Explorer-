@@ -1,5 +1,5 @@
 
-import { ResourceType, Category, ResearchItem } from './types';
+import { ResourceType, Category, ResearchItem, ModelItem } from './types';
 
 export const RESEARCH_ITEMS: ResearchItem[] = [
   {
@@ -9,92 +9,135 @@ export const RESEARCH_ITEMS: ResearchItem[] = [
     year: 2021,
     type: ResourceType.DATASET,
     category: Category.GENERAL,
-    description: 'A benchmark designed to measure knowledge acquired during pretraining by evaluating models across 57 subjects such as STEM, the humanities, the social sciences, and more.',
+    description: 'A benchmark designed to measure knowledge acquired during pretraining by evaluating models across 57 subjects.',
     link: 'https://arxiv.org/abs/2009.03300',
     projectLink: 'https://github.com/hendrycks/test',
     tags: ['Benchmark', 'Knowledge', 'STEM'],
     itemCount: '15,908 questions',
     citationCount: 4200,
     domain: 'General Knowledge / STEM / Humanities',
-    methodology: 'Multiple-choice questions across 57 subjects spanning various difficulty levels from elementary to professional.',
+    methodology: 'Multiple-choice questions across 57 subjects spanning various difficulty levels.',
+    citationHistory: [
+      { year: 2021, count: 120 },
+      { year: 2022, count: 850 },
+      { year: 2023, count: 1800 },
+      { year: 2024, count: 1430 }
+    ],
+    metrics: ['Accuracy'],
+    metricConfigs: [
+      {
+        name: 'Accuracy (Zero-shot / 5-shot)',
+        description: 'The proportion of questions where the model selects the correct option (A, B, C, or D).',
+        formula: 'Correct Predictions / Total Questions',
+        range: '0 - 100%'
+      },
+      {
+        name: 'Weighted Accuracy',
+        description: 'Averages the accuracy across 57 subjects, treating each subject equally rather than each question equally.',
+        formula: 'Sum(Subject Accuracies) / 57',
+        range: '0 - 100%'
+      }
+    ],
+    exampleQuestions: [
+      {
+        id: 'mmlu-1',
+        prompt: 'Subject: High School Physics\n\nA ball is thrown vertically upward. At the very top of its trajectory, which of the following is true?',
+        options: [
+          'A) Its velocity is zero and its acceleration is zero.',
+          'B) Its velocity is zero and its acceleration is 9.8 m/s^2 downwards.',
+          'C) Its velocity is 9.8 m/s^2 and its acceleration is zero.',
+          'D) Its velocity is 9.8 m/s^2 and its acceleration is 9.8 m/s^2.'
+        ],
+        answer: 'B',
+        reasoning: 'At the peak of the trajectory, the object momentarily stops (velocity = 0), but gravity is still acting on it (acceleration = g).'
+      }
+    ],
+    involvedModels: ['GPT-4', 'Claude 3.5', 'Llama 3', 'Qwen 2'],
+    leaderboard: [
+      { modelName: 'GPT-4o', score: '88.7%', metric: 'Accuracy', date: '2024-05' },
+      { modelName: 'Claude 3.5 Sonnet', score: '88.1%', metric: 'Accuracy', date: '2024-06' },
+      { modelName: 'Gemini 1.5 Pro', score: '85.9%', metric: 'Accuracy', date: '2024-04' },
+      { modelName: 'Llama 3 70B', score: '82.0%', metric: 'Accuracy', date: '2024-04' }
+    ],
     relatedPapers: [
-      { title: 'GPQA: A Graduate-Level Google-Proof Q&A Benchmark', link: 'https://arxiv.org/abs/2311.12022' },
-      { title: 'ARC: AI2 Reasoning Challenge', link: 'https://arxiv.org/abs/1803.05457' }
-    ]
-  },
-  {
-    id: 'helm',
-    title: 'Holistic Evaluation of Language Models (HELM)',
-    authors: ['Percy Liang', 'Rishi Bommasani', 'Tony Lee', 'et al.'],
-    year: 2022,
-    type: ResourceType.PAPER,
-    category: Category.GENERAL,
-    description: 'A comprehensive framework to evaluate language models across a diverse set of scenarios and metrics, providing a holistic view of model performance.',
-    link: 'https://arxiv.org/abs/2211.09110',
-    projectLink: 'https://crfm.stanford.edu/helm/latest/',
-    tags: ['Framework', 'Holistic', 'Benchmarking'],
-    citationCount: 850,
-    domain: 'Model Evaluation Frameworks',
-    methodology: 'Establishing a top-down taxonomy of 16 scenarios and 7 metrics (accuracy, calibration, robustness, fairness, bias, toxicity, and efficiency).',
-    relatedPapers: [
-      { title: 'Evaluating Large Language Models: A Comprehensive Survey', link: 'https://arxiv.org/abs/2307.03109' }
+      { title: 'GPQA: A Graduate-Level Google-Proof Q&A Benchmark', link: '#' }
     ]
   },
   {
     id: 'gsm8k',
     title: 'GSM8K: Grade School Math 8K',
-    authors: ['Karl Cobbe', 'Vineet Kosaraju', 'Mohammad Bavarian', 'et al.'],
+    authors: ['Karl Cobbe', 'et al.'],
     year: 2021,
     type: ResourceType.DATASET,
     category: Category.MATH,
-    description: 'A dataset of 8.5K high quality grade school math word problems. Solving these requires multi-step reasoning.',
+    description: 'A dataset of 8.5K high quality grade school math word problems.',
     link: 'https://arxiv.org/abs/2110.14168',
     projectLink: 'https://github.com/openai/grade-school-math',
-    tags: ['Math', 'Reasoning', 'Chain-of-Thought'],
+    tags: ['Math', 'Reasoning'],
     itemCount: '8,500 problems',
     citationCount: 1200,
-    domain: 'Mathematical Reasoning',
-    methodology: 'Crowdsourced grade school math problems that require multi-step reasoning to solve, specifically designed to test Chain-of-Thought capabilities.',
-    relatedPapers: [
-      { title: 'Training Verifiers to Solve Math Word Problems', link: 'https://arxiv.org/abs/2110.14168' }
+    citationHistory: [
+      { year: 2021, count: 45 },
+      { year: 2022, count: 310 },
+      { year: 2023, count: 580 },
+      { year: 2024, count: 265 }
+    ],
+    metrics: ['Exact Match (EM)'],
+    metricConfigs: [
+      {
+        name: 'Exact Match (EM)',
+        description: 'The model must generate the final numerical answer correctly. Typically extracted after "####" in the solution.',
+        formula: 'if extracted_answer == golden_answer: 1 else 0',
+        range: '0 - 100%'
+      }
+    ],
+    exampleQuestions: [
+      {
+        id: 'gsm8k-1',
+        prompt: 'Janet has 5 apples. She buys 3 more at the store, then eats 2 on the way home. How many apples does she have left?',
+        answer: '6',
+        reasoning: 'Janet starts with 5 apples. \nShe buys 3 more: 5 + 3 = 8. \nShe eats 2: 8 - 2 = 6. \n\nAnswer: 6'
+      }
+    ],
+    leaderboard: [
+      { modelName: 'o1-preview', score: '94.8%', metric: 'EM', date: '2024-09' },
+      { modelName: 'GPT-4o', score: '92.0%', metric: 'EM', date: '2024-05' },
+      { modelName: 'Claude 3.5 Sonnet', score: '91.5%', metric: 'EM', date: '2024-06' }
     ]
+  }
+];
+
+export const MODEL_ITEMS: ModelItem[] = [
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    organization: 'OpenAI',
+    releaseDate: '2024-05-13',
+    description: 'A multimodal model that reasons across audio, vision, and text in real time.',
+    tasks: ['Multimodal reasoning', 'Coding', 'Creative writing'],
+    evalData: [
+      { datasetId: 'mmlu', datasetName: 'MMLU', score: '88.7%', metric: 'Accuracy' },
+      { datasetId: 'gsm8k', datasetName: 'GSM8K', score: '92.0%', metric: 'EM' }
+    ],
+    predecessorId: 'gpt-4-turbo',
+    predecessorName: 'GPT-4 Turbo',
+    successorId: 'o1',
+    successorName: 'o1-series'
   },
   {
-    id: 'human-eval',
-    title: 'HumanEval: Evaluating Large Language Models Trained on Code',
-    authors: ['Mark Chen', 'Jerry Tworek', 'Heewoo Jun', 'et al.'],
-    year: 2021,
-    type: ResourceType.DATASET,
-    category: Category.CODING,
-    description: 'A dataset released by OpenAI for evaluating code generation capabilities, specifically measuring Python code completion performance.',
-    link: 'https://arxiv.org/abs/2107.03374',
-    projectLink: 'https://github.com/openai/human-eval',
-    tags: ['Coding', 'Python', 'Synthesis'],
-    itemCount: '164 problems',
-    citationCount: 3100,
-    domain: 'Software Engineering / Code Generation',
-    methodology: '164 handwritten Python programming problems with unit tests to measure functional correctness via pass@k metric.',
-    relatedPapers: [
-      { title: 'MBPP: Mostly Basic Python Problems', link: 'https://arxiv.org/abs/2108.07732' }
-    ]
-  },
-  {
-    id: 'truthfulqa',
-    title: 'TruthfulQA: Measuring How Models Mimic Human Falsehoods',
-    authors: ['Stephanie Lin', 'Jacob Hilton', 'Owain Evans'],
-    year: 2022,
-    type: ResourceType.DATASET,
-    category: Category.SAFETY,
-    description: 'A benchmark to measure whether a language model is truthful in generating answers to questions, specifically targeting common human misconceptions.',
-    link: 'https://arxiv.org/abs/2109.07958',
-    projectLink: 'https://github.com/sylinrl/TruthfulQA',
-    tags: ['Safety', 'Hallucination', 'Truthfulness'],
-    itemCount: '817 questions',
-    citationCount: 950,
-    domain: 'AI Safety / Fact-checking',
-    methodology: 'Adversarially constructed questions spanning 38 categories that test for false beliefs and common misconceptions.',
-    relatedPapers: [
-      { title: 'HaluEval: A Large-Scale Hallucination Evaluation Benchmark', link: 'https://arxiv.org/abs/2305.11747' }
-    ]
+    id: 'qwen-2',
+    name: 'Qwen-2',
+    organization: 'Alibaba Cloud',
+    releaseDate: '2024-06-07',
+    description: 'The next generation of Qwen series, featuring significantly improved performance in coding, mathematics, and reasoning.',
+    tasks: ['General purpose', 'Coding', 'Math'],
+    evalData: [
+      { datasetId: 'mmlu', datasetName: 'MMLU', score: '84.2%', metric: 'Accuracy' },
+      { datasetId: 'gsm8k', datasetName: 'GSM8K', score: '91.1%', metric: 'EM' }
+    ],
+    predecessorId: 'qwen-1.5',
+    predecessorName: 'Qwen-1.5',
+    successorId: 'qwen-2.5',
+    successorName: 'Qwen-2.5'
   }
 ];
