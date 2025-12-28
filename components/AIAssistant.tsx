@@ -47,13 +47,13 @@ const AIAssistant: React.FC = () => {
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-grow overflow-y-auto p-4 space-y-4">
+      <div ref={scrollRef} className="flex-grow overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-transparent">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-2xl p-3 text-sm ${
+            <div className={`max-w-[85%] rounded-2xl p-3 text-sm shadow-sm ${
               msg.role === 'user' 
               ? 'bg-blue-600 text-white rounded-tr-none' 
-              : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
+              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700'
             }`}>
               {msg.content}
             </div>
@@ -61,7 +61,7 @@ const AIAssistant: React.FC = () => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 rounded-2xl p-3 flex space-x-1 items-center">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-3 flex space-x-1 items-center border border-slate-200 dark:border-slate-700 shadow-sm">
               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-.3s]"></div>
               <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-.5s]"></div>
@@ -70,7 +70,7 @@ const AIAssistant: React.FC = () => {
         )}
       </div>
 
-      <div className="p-4 bg-slate-900/50 border-t border-slate-800">
+      <div className="p-4 bg-white dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
         <div className="relative">
           <input 
             type="text" 
@@ -78,12 +78,12 @@ const AIAssistant: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask a question..."
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-slate-500"
+            className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white placeholder-slate-500"
           />
           <button 
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white p-1.5 rounded-lg transition-colors"
+            className="absolute right-2 top-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white p-1.5 rounded-lg transition-colors"
           >
             <i className="fas fa-paper-plane text-xs"></i>
           </button>
